@@ -7,13 +7,16 @@ Table of Contents
 - Technologies Used 
 - How to Run 
 - Future Enhancements
+
 Project Overview
 The goal of this project is to analyze the sentiment of textual data using various NLP techniques. It serves as a practical guide to:
 1.  Text Preprocessing: Cleaning and preparing raw text for analysis.
 2.  Feature Engineering: Converting text into numerical representations.
 3.  Sentiment Analysis: Applying models to classify the emotional tone of text.
+   
 Dataset
 The notebook uses a small set of custom sample sentences to demonstrate each step of the pipeline. These sentences are simple examples to illustrate the functionality of the preprocessing and sentiment analysis tools.
+
 Key Features
 ✔ Text Preprocessing
 *   Lowercasing: Converting all text to lowercase for consistency.
