@@ -1,0 +1,571 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPj9Jf/nPK+25nt+LxwZow1",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/kayorde25/Sentiment-analysis/blob/main/NLP%20Sentiment%20Analysis%20Project\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "0yL3U7K5ndwj"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "8dfd27f8"
+      },
+      "source": [
+        "## NLP Sentiment Analysis Project\n",
+        "\n",
+        "This notebook demonstrates:\n",
+        "- Text preprocessing techniques\n",
+        "- Bag of Words and TF-IDF encoding\n",
+        "- Sentiment analysis using VADER and TextBlob\n",
+        "\n",
+        "Dataset: Custom sample sentences"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "b841db96"
+      },
+      "source": [
+        "# ✅ 1. Fix Import Error"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5dda2a97",
+        "outputId": "7f84e352-af8b-4b59-cf46-657bd5ef2da3"
+      },
+      "source": [
+        "import nltk\n",
+        "nltk.download('punkt')\n",
+        "nltk.download('stopwords')\n",
+        "nltk.download('vader_lexicon')\n",
+        "nltk.download('punkt_tab') # Added to fix LookupError\n",
+        "\n",
+        "import re\n",
+        "from nltk.tokenize import word_tokenize\n",
+        "from nltk.corpus import stopwords"
+      ],
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "[nltk_data] Downloading package punkt to /root/nltk_data...\n",
+            "[nltk_data]   Package punkt is already up-to-date!\n",
+            "[nltk_data] Downloading package stopwords to /root/nltk_data...\n",
+            "[nltk_data]   Package stopwords is already up-to-date!\n",
+            "[nltk_data] Downloading package vader_lexicon to /root/nltk_data...\n",
+            "[nltk_data]   Package vader_lexicon is already up-to-date!\n",
+            "[nltk_data] Downloading package punkt_tab to /root/nltk_data...\n",
+            "[nltk_data]   Unzipping tokenizers/punkt_tab.zip.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "165c3742"
+      },
+      "source": [
+        "# Placeholder text data\n",
+        "d1 = \"This is a great movie! I loved every minute of it.\"\n",
+        "d2 = \"The food was not good. I'm very disappointed.\"\n",
+        "d3 = \"It was an okay experience, neither good nor bad.\"\n",
+        "d4 = \"What a fantastic day! The sun is shining brightly.\""
+      ],
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "7874bf72"
+      },
+      "source": [
+        "# ✅ 2. Stopwords (Keep “not”)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "6d5d7f84",
+        "outputId": "2e255c4a-d0de-4530-a0bb-60c00e1076c7"
+      },
+      "source": [
+        "stop_words = set(stopwords.words('english'))\n",
+        "stop_words.remove('not')\n",
+        "print(stop_words)"
+      ],
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "{'of', \"hadn't\", \"we're\", 'after', 'itself', 'don', 'am', 'do', \"shouldn't\", 'there', 'same', 'our', 'only', \"i'll\", 'hadn', 'my', 'where', 'does', 'doing', 'had', 'wasn', 'this', \"she's\", 'aren', 'whom', 'shouldn', \"they'd\", 'to', 'between', 'herself', \"that'll\", \"weren't\", 'about', 'down', 'the', 'other', \"we'd\", 'its', \"we've\", \"don't\", 'has', \"it's\", 'should', 'themselves', 'while', 'no', 'y', \"she'll\", 'once', 'her', 'yourself', 'is', 'was', 'he', 'him', 'isn', 'above', 'at', 'she', 'been', 't', 'were', 'an', \"it'd\", 'more', 'yours', \"hasn't\", 'each', 'ain', 'up', 'doesn', 'will', 'until', 'against', 'further', \"aren't\", 'they', 'so', 'how', \"she'd\", 'and', \"he's\", 'as', 'hasn', 'be', 'd', 'haven', 'you', 'a', 'out', 'theirs', 'm', 'it', 'me', 'these', 'can', 'in', \"wasn't\", 'when', \"you'll\", 'his', 'all', \"couldn't\", 'your', 'll', \"should've\", 'own', 'why', \"i've\", 'ourselves', 'being', 'then', \"they've\", \"it'll\", \"mightn't\", 'we', 'ours', 'than', 'weren', 're', 'who', \"he'll\", \"isn't\", \"they're\", 'such', 'very', 'won', \"mustn't\", 'are', 'himself', \"they'll\", \"he'd\", 'hers', 'didn', 'off', 'i', \"haven't\", 'mightn', 'some', 'from', 'myself', 'what', 'below', 'ma', 'mustn', 'any', 'them', \"didn't\", 'by', \"we'll\", \"won't\", 'or', 'now', 'shan', 'on', 'most', 'which', \"wouldn't\", \"shan't\", \"you'd\", \"i'm\", 'nor', 'with', 'having', 've', 'have', 'during', 'that', 'if', 'those', \"you've\", 'wouldn', 'into', 'before', 'both', 'did', 'through', 'just', 'yourselves', 'but', 'few', 'because', 'for', 'over', 'under', 'o', \"i'd\", 's', 'here', 'their', \"you're\", 'needn', 'again', 'too', 'couldn', \"doesn't\", \"needn't\"}\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "d174e117"
+      },
+      "source": [
+        "# ✅ 3. Preprocessing Function"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "752fc7fc"
+      },
+      "source": [
+        "def preprocess(text):\n",
+        "    # Lowercase\n",
+        "    text = text.lower()\n",
+        "\n",
+        "    # Remove punctuation\n",
+        "    text = re.sub(r'[^\\w\\s]', '', text)\n",
+        "\n",
+        "    # Tokenize\n",
+        "    tokens = word_tokenize(text)\n",
+        "\n",
+        "    # Remove stopwords (except 'not')\n",
+        "    tokens = [word for word in tokens if word not in stop_words]\n",
+        "\n",
+        "    return tokens"
+      ],
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "52707f70"
+      },
+      "source": [
+        "# NLP Sentiment Analysis Project\n",
+        "\n",
+        "This repository contains a Google Colab notebook demonstrating key concepts in Natural Language Processing (NLP) with a focus on sentiment analysis. The project covers text preprocessing, feature engineering, and the application of different sentiment analysis models.\n",
+        "\n",
+        "## Table of Contents\n",
+        "\n",
+        "- [Project Overview](#project-overview)\n",
+        "- [Dataset](#dataset)\n",
+        "- [Key Features](#key-features)\n",
+        "- [Technologies Used](#technologies-used)\n",
+        "- [How to Run](#how-to-run)\n",
+        "- [Future Enhancements](#future-enhancements)\n",
+        "\n",
+        "## Project Overview\n",
+        "\n",
+        "The goal of this project is to analyze the sentiment of textual data using various NLP techniques. It serves as a practical guide to:\n",
+        "\n",
+        "1.  **Text Preprocessing:** Cleaning and preparing raw text for analysis.\n",
+        "2.  **Feature Engineering:** Converting text into numerical representations.\n",
+        "3.  **Sentiment Analysis:** Applying models to classify the emotional tone of text.\n",
+        "\n",
+        "## Dataset\n",
+        "\n",
+        "The notebook uses a small set of custom sample sentences to demonstrate each step of the pipeline. These sentences are simple examples to illustrate the functionality of the preprocessing and sentiment analysis tools.\n",
+        "\n",
+        "## Key Features\n",
+        "\n",
+        "### ✔ Text Preprocessing\n",
+        "\n",
+        "*   **Lowercasing:** Converting all text to lowercase for consistency.\n",
+        "*   **Cleaning:** Removing punctuation and special characters.\n",
+        "*   **Tokenization:** Breaking down text into individual words or tokens.\n",
+        "*   **Stopword Control:** Removing common words (stopwords) that do not carry much meaning, with a special consideration to *keep* the word 'not' as it is crucial for sentiment inversion (e.g., 'not good' vs. 'good').\n",
+        "\n",
+        "### ✔ Feature Engineering\n",
+        "\n",
+        "*   **Bag of Words (BoW):** Representing text as a collection of word counts, disregarding grammar and word order.\n",
+        "*   **TF-IDF (Term Frequency-Inverse Document Frequency):** A numerical statistic that reflects how important a word is to a document in a collection or corpus.\n",
+        "\n",
+        "### ✔ Sentiment Analysis Models\n",
+        "\n",
+        "*   **VADER (Valence Aware Dictionary and sEntiment Reasoner):** A lexicon and rule-based sentiment analysis tool specifically attuned to sentiments expressed in social media.\n",
+        "*   **TextBlob:** A library for processing textual data, providing a simple API for common NLP tasks, including sentiment analysis (polarity and subjectivity).\n",
+        "\n",
+        "## Technologies Used\n",
+        "\n",
+        "*   Python 3\n",
+        "*   `nltk` (Natural Language Toolkit) for text processing and sentiment analysis (VADER).\n",
+        "*   `scikit-learn` for `CountVectorizer` and `TfidfVectorizer`.\n",
+        "*   `TextBlob` for polarity-based sentiment analysis.\n",
+        "*   `re` for regular expressions.\n",
+        "\n",
+        "## How to Run\n",
+        "\n",
+        "1.  **Open in Google Colab:** Click the 'Open in Colab' badge (if available) or upload the `.ipynb` file to Google Colab.\n",
+        "2.  **Install Dependencies:** Ensure all necessary NLTK data is downloaded by running the first code cell.\n",
+        "3.  **Run All Cells:** Execute the cells sequentially to see the preprocessing, feature engineering, and sentiment analysis in action.\n",
+        "\n",
+        "## Future Enhancements\n",
+        "\n",
+        "This project can be upgraded into a full-fledged Machine Learning project by:\n",
+        "\n",
+        "*   Adding a larger, real-world dataset (e.g., IMDB movie review dataset).\n",
+        "*   Training traditional machine learning models (e.g., Logistic Regression, Naive Bayes) for classification.\n",
+        "*   Implementing accuracy metrics and evaluation techniques.\n",
+        "*   Refining the model for production or a recruiter-ready portfolio piece."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "e42a439d"
+      },
+      "source": [
+        "# ✅ 4. Apply Preprocessing"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "d29fc205",
+        "outputId": "d90a4879-a011-4883-bd4a-a7526d4bd6ac"
+      },
+      "source": [
+        "p1 = preprocess(d1)\n",
+        "p2 = preprocess(d2)\n",
+        "p3 = preprocess(d3)\n",
+        "p4 = preprocess(d4)\n",
+        "\n",
+        "# Join all\n",
+        "corpus = [' '.join(p1), ' '.join(p2), ' '.join(p3), ' '.join(p4)]\n",
+        "\n",
+        "print(corpus)"
+      ],
+      "execution_count": 12,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "['great movie loved every minute', 'food not good im disappointed', 'okay experience neither good bad', 'fantastic day sun shining brightly']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "c0ef1f12"
+      },
+      "source": [
+        "# ✅ 5. Bag of Words (CountVectorizer)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "3c851b85",
+        "outputId": "4bc4f4a6-d783-4b1c-a989-0413a8b4bf89"
+      },
+      "source": [
+        "from sklearn.feature_extraction.text import CountVectorizer\n",
+        "\n",
+        "cv = CountVectorizer()\n",
+        "X = cv.fit_transform(corpus)\n",
+        "\n",
+        "print(\"Vocabulary:\", cv.vocabulary_)\n",
+        "print(\"Shape:\", X.shape)\n",
+        "print(\"Type:\", type(X))\n",
+        "print(\"Array:\\n\", X.toarray())"
+      ],
+      "execution_count": 13,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Vocabulary: {'great': 9, 'movie': 13, 'loved': 11, 'every': 4, 'minute': 12, 'food': 7, 'not': 15, 'good': 8, 'im': 10, 'disappointed': 3, 'okay': 16, 'experience': 5, 'neither': 14, 'bad': 0, 'fantastic': 6, 'day': 2, 'sun': 18, 'shining': 17, 'brightly': 1}\n",
+            "Shape: (4, 19)\n",
+            "Type: <class 'scipy.sparse._csr.csr_matrix'>\n",
+            "Array:\n",
+            " [[0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 0 0 0 0]\n",
+            " [0 0 0 1 0 0 0 1 1 0 1 0 0 0 0 1 0 0 0]\n",
+            " [1 0 0 0 0 1 0 0 1 0 0 0 0 0 1 0 1 0 0]\n",
+            " [0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 1]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "a1a990a8"
+      },
+      "source": [
+        "# ✅ 6. Vocabulary Only"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "77e9e5d8",
+        "outputId": "5ff9a915-dac7-4500-86ea-f87ba931b4b8"
+      },
+      "source": [
+        "print(\"Vocabulary:\", cv.get_feature_names_out())"
+      ],
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Vocabulary: ['bad' 'brightly' 'day' 'disappointed' 'every' 'experience' 'fantastic'\n",
+            " 'food' 'good' 'great' 'im' 'loved' 'minute' 'movie' 'neither' 'not'\n",
+            " 'okay' 'shining' 'sun']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "2c103b3d"
+      },
+      "source": [
+        "# ✅ 7. TF-IDF Vectorization"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "0302ba01",
+        "outputId": "01aeb4a1-f66a-4fba-c02e-bc67caabf60e"
+      },
+      "source": [
+        "from sklearn.feature_extraction.text import TfidfVectorizer\n",
+        "\n",
+        "tfidf = TfidfVectorizer()\n",
+        "X_tfidf = tfidf.fit_transform(corpus)\n",
+        "\n",
+        "print(\"Vocabulary:\", tfidf.vocabulary_)\n",
+        "print(\"IDF values:\", tfidf.idf_)\n",
+        "print(\"Shape:\", X_tfidf.shape)\n",
+        "print(\"Matrix:\\n\", X_tfidf.toarray())"
+      ],
+      "execution_count": 15,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Vocabulary: {'great': 9, 'movie': 13, 'loved': 11, 'every': 4, 'minute': 12, 'food': 7, 'not': 15, 'good': 8, 'im': 10, 'disappointed': 3, 'okay': 16, 'experience': 5, 'neither': 14, 'bad': 0, 'fantastic': 6, 'day': 2, 'sun': 18, 'shining': 17, 'brightly': 1}\n",
+            "IDF values: [1.91629073 1.91629073 1.91629073 1.91629073 1.91629073 1.91629073\n",
+            " 1.91629073 1.91629073 1.51082562 1.91629073 1.91629073 1.91629073\n",
+            " 1.91629073 1.91629073 1.91629073 1.91629073 1.91629073 1.91629073\n",
+            " 1.91629073]\n",
+            "Shape: (4, 19)\n",
+            "Matrix:\n",
+            " [[0.         0.         0.         0.         0.4472136  0.\n",
+            "  0.         0.         0.         0.4472136  0.         0.4472136\n",
+            "  0.4472136  0.4472136  0.         0.         0.         0.\n",
+            "  0.        ]\n",
+            " [0.         0.         0.         0.46516193 0.         0.\n",
+            "  0.         0.46516193 0.36673901 0.         0.46516193 0.\n",
+            "  0.         0.         0.         0.46516193 0.         0.\n",
+            "  0.        ]\n",
+            " [0.46516193 0.         0.         0.         0.         0.46516193\n",
+            "  0.         0.         0.36673901 0.         0.         0.\n",
+            "  0.         0.         0.46516193 0.         0.46516193 0.\n",
+            "  0.        ]\n",
+            " [0.         0.4472136  0.4472136  0.         0.         0.\n",
+            "  0.4472136  0.         0.         0.         0.         0.\n",
+            "  0.         0.         0.         0.         0.         0.4472136\n",
+            "  0.4472136 ]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "f81cca7c"
+      },
+      "source": [
+        "# ✅ 8. VADER Sentiment"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "e33798bc",
+        "outputId": "b9ba98cc-6ebe-4e7f-fc94-c2b0bce596fc"
+      },
+      "source": [
+        "from nltk.sentiment import SentimentIntensityAnalyzer\n",
+        "\n",
+        "sia = SentimentIntensityAnalyzer()\n",
+        "\n",
+        "print(\"d1:\", sia.polarity_scores(d1))\n",
+        "print(\"d2:\", sia.polarity_scores(d2))\n",
+        "print(\"d3:\", sia.polarity_scores(d3))\n",
+        "print(\"d4:\", sia.polarity_scores(d4))"
+      ],
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "d1: {'neg': 0.0, 'neu': 0.458, 'pos': 0.542, 'compound': 0.8516}\n",
+            "d2: {'neg': 0.491, 'neu': 0.509, 'pos': 0.0, 'compound': -0.7003}\n",
+            "d3: {'neg': 0.377, 'neu': 0.473, 'pos': 0.15, 'compound': -0.4357}\n",
+            "d4: {'neg': 0.0, 'neu': 0.484, 'pos': 0.516, 'compound': 0.75}\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "158f2292"
+      },
+      "source": [
+        "# ✅ 9. TextBlob Sentiment"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "8145d19f",
+        "outputId": "0014a1e6-c091-4782-84bb-1692e0872089"
+      },
+      "source": [
+        "from textblob import TextBlob\n",
+        "\n",
+        "print(\"d1:\", TextBlob(d1).sentiment)\n",
+        "print(\"d2:\", TextBlob(d2).sentiment)\n",
+        "print(\"d3:\", TextBlob(d3).sentiment)\n",
+        "print(\"d4:\", TextBlob(d4).sentiment)"
+      ],
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "d1: Sentiment(polarity=0.85, subjectivity=0.775)\n",
+            "d2: Sentiment(polarity=-0.6625000000000001, subjectivity=0.7875000000000001)\n",
+            "d3: Sentiment(polarity=0.1666666666666667, subjectivity=0.5888888888888889)\n",
+            "d4: Sentiment(polarity=0.6000000000000001, subjectivity=0.85)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "c388ecd7"
+      },
+      "source": [
+        "We are demonstrating:\n",
+        "\n",
+        "### ✔ Text preprocessing\n",
+        "\n",
+        "* Lowercasing\n",
+        "* Cleaning\n",
+        "* Tokenization\n",
+        "* Stopword control (**keeping \"not\" is key for sentiment**)\n",
+        "\n",
+        "### ✔ Feature Engineering\n",
+        "\n",
+        "* Bag of Words\n",
+        "* TF-IDF\n",
+        "\n",
+        "### ✔ Sentiment Analysis Models\n",
+        "\n",
+        "* VADER (rule-based, social media)\n",
+        "* TextBlob (polarity-based)\n",
+        "\n",
+        "---"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "d4b29c79"
+      },
+      "source": [
+        "\n",
+        "## NLP Sentiment Analysis Project\n",
+        "\n",
+        "This notebook demonstrates:\n",
+        "- Text preprocessing techniques\n",
+        "- Bag of Words and TF-IDF encoding\n",
+        "- Sentiment analysis using VADER and TextBlob\n",
+        "\n",
+        "Dataset: Custom sample sentences\n",
+        "```\n",
+        "\n",
+        "---"
+      ]
+    }
+  ]
+}
